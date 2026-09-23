@@ -189,6 +189,9 @@ interface ProfileData {
   primaryTextColor: string;
   accentColor: string;
 
+  // Text size scaling for the card (e.g., 0.85x - 1.45x, default 1.15x)
+  fontScale?: number;
+
   // Zoom: extended scale from 0.5x up to 5.0x
   imageZoom: number;
   imageBorderRadius: number;
@@ -208,6 +211,7 @@ const DEFAULT_PROFILE: ProfileData = {
   bodyFont: 'jetbrains',
   primaryTextColor: '#ffffff',
   accentColor: '#d4ff00',
+  fontScale: 1.15,
   imageZoom: 1.0,
   imageBorderRadius: 10,
 };
@@ -319,9 +323,10 @@ export const GithubReadmeModal: React.FC<GithubReadmeModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Selected fonts
+  // Selected fonts and scaling
   const activeHeadingFont = HEADING_FONTS[profile.headingFont] || HEADING_FONTS.system;
   const activeBodyFont = BODY_FONTS[profile.bodyFont] || BODY_FONTS.jetbrains;
+  const cardFontScale = profile.fontScale || 1.15;
 
   // Format LinkedIn link safely
   const formattedLinkedinUrl = profile.linkedinUrl.startsWith('http')
@@ -512,13 +517,14 @@ export const GithubReadmeModal: React.FC<GithubReadmeModalProps> = ({
           ctx.fillRect(34, 34, width - 68, 2);
 
           // Left Label: GITHUB DEVELOPER CARD
+          const scale = profile.fontScale || 1.15;
           ctx.fillStyle = accent;
-          ctx.font = `bold 13px ${bFont}`;
+          ctx.font = `bold ${Math.round(13 * scale)}px ${bFont}`;
           ctx.fillText('GITHUB DEVELOPER CARD', 56, 66);
 
           // Right Label: LOCATION: INDIA
           ctx.fillStyle = textSecondary;
-          ctx.font = `500 12px ${bFont}`;
+          ctx.font = `500 ${Math.round(12 * scale)}px ${bFont}`;
           const locText = `LOCATION: ${profile.location.toUpperCase()}`;
           const locWidth = ctx.measureText(locText).width;
           ctx.fillText(locText, width - 56 - locWidth, 66);
@@ -527,13 +533,14 @@ export const GithubReadmeModal: React.FC<GithubReadmeModalProps> = ({
           contentStartY = 110;
         } else if (profile.headerStyle === 'compact-inline') {
           // Subtle inline line without filled bar
+          const scale = profile.fontScale || 1.15;
           ctx.save();
           ctx.fillStyle = `${accent}bb`;
-          ctx.font = `bold 12px ${bFont}`;
+          ctx.font = `bold ${Math.round(12 * scale)}px ${bFont}`;
           ctx.fillText('GITHUB DEVELOPER CARD', 56, 58);
 
           ctx.fillStyle = textSecondary;
-          ctx.font = `500 11px ${bFont}`;
+          ctx.font = `500 ${Math.round(11 * scale)}px ${bFont}`;
           const locText = `LOCATION: ${profile.location.toUpperCase()}`;
           const locWidth = ctx.measureText(locText).width;
           ctx.fillText(locText, width - 56 - locWidth, 58);
@@ -620,32 +627,42 @@ export const GithubReadmeModal: React.FC<GithubReadmeModalProps> = ({
         drawCornerBrackets(ctx, photoX - 3, photoY - 3, photoW + 6, photoH + 6, 12, `${accent}aa`);
 
         // 3. RIGHT: Identity Data Fields
+        const scale = profile.fontScale || 1.15;
+        const nameFontSize = Math.round(38 * scale);
+        const titleFontSize = Math.round(16 * scale);
+        const bodyFontSize = Math.round(14 * scale);
+        const labelFontSize = Math.round(11 * scale);
+        const tagFontSize = Math.round(12 * scale);
+        const bodyLineHeight = Math.round(20 * scale);
+        const tagHeight = Math.round(26 * scale);
+        const tagPadding = Math.round(12 * scale);
+
         const textX = 380;
-        let curY = contentStartY + 26;
+        let curY = contentStartY + Math.round(24 * scale);
 
         // NAME
         ctx.fillStyle = accent;
-        ctx.font = `bold 11px ${bFont}`;
+        ctx.font = `bold ${labelFontSize}px ${bFont}`;
         ctx.fillText('NAME', textX, curY);
 
-        curY += 34;
+        curY += Math.round(nameFontSize * 0.85 + 10);
         ctx.fillStyle = textPrimary;
-        ctx.font = `bold 38px ${hFont}`;
+        ctx.font = `bold ${nameFontSize}px ${hFont}`;
         ctx.fillText(profile.name, textX, curY);
 
-        curY += 30;
+        curY += Math.round(26 * scale);
 
         // TITLE & LOCATION
         ctx.fillStyle = accent;
-        ctx.font = `bold 11px ${bFont}`;
+        ctx.font = `bold ${labelFontSize}px ${bFont}`;
         ctx.fillText('TITLE & LOCATION', textX, curY);
 
-        curY += 22;
+        curY += Math.round(titleFontSize * 1.0 + 8);
         ctx.fillStyle = textPrimary;
-        ctx.font = `600 16px ${bFont}`;
+        ctx.font = `600 ${titleFontSize}px ${bFont}`;
         ctx.fillText(`${profile.role} · ${profile.location}`, textX, curY);
 
-        curY += 20;
+        curY += Math.round(16 * scale);
         ctx.strokeStyle = 'rgba(255,255,255,0.08)';
         ctx.lineWidth = 1;
         ctx.beginPath();
@@ -653,33 +670,31 @@ export const GithubReadmeModal: React.FC<GithubReadmeModalProps> = ({
         ctx.lineTo(width - 56, curY);
         ctx.stroke();
 
-        curY += 26;
+        curY += Math.round(22 * scale);
 
         // CURRENT STATUS
         ctx.fillStyle = accent;
-        ctx.font = `bold 11px ${bFont}`;
+        ctx.font = `bold ${labelFontSize}px ${bFont}`;
         ctx.fillText('CURRENT STATUS', textX, curY);
 
-        curY += 20;
+        curY += Math.round(bodyFontSize + 9);
         ctx.fillStyle = textPrimary;
-        ctx.font = `400 14px ${bFont}`;
-        curY = wrapText(ctx, profile.status, textX, curY, 740, 20);
+        ctx.font = `400 ${bodyFontSize}px ${bFont}`;
+        curY = wrapText(ctx, profile.status, textX, curY, 740, bodyLineHeight);
 
-        curY += 16;
+        curY += Math.round(18 * scale);
 
         // SKILLS (Rendered as clean tags)
         ctx.fillStyle = accent;
-        ctx.font = `bold 11px ${bFont}`;
+        ctx.font = `bold ${labelFontSize}px ${bFont}`;
         ctx.fillText('CORE SKILLS & TECHNOLOGIES', textX, curY);
 
-        curY += 22;
+        curY += Math.round(tagFontSize + 14);
 
         // Draw skill badges on canvas
-        ctx.font = `500 12px ${bFont}`;
+        ctx.font = `500 ${tagFontSize}px ${bFont}`;
         let tagX = textX;
         let tagY = curY;
-        const tagHeight = 26;
-        const tagPadding = 12;
 
         skillTags.forEach((skill) => {
           const tagWidth = ctx.measureText(skill).width + tagPadding * 2;
@@ -693,14 +708,15 @@ export const GithubReadmeModal: React.FC<GithubReadmeModalProps> = ({
           ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
           ctx.strokeStyle = `${accent}40`;
           ctx.lineWidth = 1;
+          const badgeYOffset = Math.round(tagFontSize * 1.25);
           if (ctx.roundRect) {
             ctx.beginPath();
-            ctx.roundRect(tagX, tagY - 16, tagWidth, tagHeight, 6);
+            ctx.roundRect(tagX, tagY - badgeYOffset, tagWidth, tagHeight, 6);
             ctx.fill();
             ctx.stroke();
           } else {
-            ctx.fillRect(tagX, tagY - 16, tagWidth, tagHeight);
-            ctx.strokeRect(tagX, tagY - 16, tagWidth, tagHeight);
+            ctx.fillRect(tagX, tagY - badgeYOffset, tagWidth, tagHeight);
+            ctx.strokeRect(tagX, tagY - badgeYOffset, tagWidth, tagHeight);
           }
 
           ctx.fillStyle = textPrimary;
@@ -710,17 +726,17 @@ export const GithubReadmeModal: React.FC<GithubReadmeModalProps> = ({
           tagX += tagWidth + 8;
         });
 
-        curY = tagY + 28;
+        curY = tagY + Math.round(24 * scale);
 
         // FUN PART
         ctx.fillStyle = accent;
-        ctx.font = `bold 11px ${bFont}`;
+        ctx.font = `bold ${labelFontSize}px ${bFont}`;
         ctx.fillText('FUN PART', textX, curY);
 
-        curY += 20;
+        curY += Math.round(bodyFontSize + 9);
         ctx.fillStyle = textPrimary;
-        ctx.font = `400 14px ${bFont}`;
-        wrapText(ctx, profile.funPart, textX, curY, 520, 20);
+        ctx.font = `400 ${bodyFontSize}px ${bFont}`;
+        wrapText(ctx, profile.funPart, textX, curY, 520, bodyLineHeight);
 
         // 4. PURE QR CODE AT BOTTOM-RIGHT DOWN (NO TEXT LIKE LINKEDIN OR SCAN)
         const qrBoxSize = 82;
@@ -1209,6 +1225,71 @@ export const GithubReadmeModal: React.FC<GithubReadmeModalProps> = ({
                         ))}
                       </div>
                     </div>
+
+                    {/* Card Text Size (Font Scale) */}
+                    <div className="space-y-2 pt-2 border-t border-white/10">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[11px] font-medium text-[#d4ff00] flex items-center gap-1.5">
+                          <Type className="w-3.5 h-3.5" />
+                          <span>Card Text Size</span>
+                        </label>
+                        <span className="text-[10px] font-mono text-[#d4ff00] font-bold">
+                          {((profile.fontScale || 1.15) * 100).toFixed(0)}%
+                        </span>
+                      </div>
+
+                      {/* Slider */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono text-white/40">A</span>
+                        <input
+                          type="range"
+                          min="0.85"
+                          max="1.45"
+                          step="0.05"
+                          value={profile.fontScale || 1.15}
+                          onChange={(e) =>
+                            setProfile({
+                              ...profile,
+                              fontScale: parseFloat(e.target.value),
+                            })
+                          }
+                          className="flex-1 accent-[#d4ff00] cursor-pointer"
+                        />
+                        <span className="text-sm font-mono font-bold text-white/70">A</span>
+                      </div>
+
+                      {/* Preset Buttons */}
+                      <div className="grid grid-cols-4 gap-1 pt-1">
+                        {[
+                          { label: 'Normal', scale: 1.0 },
+                          { label: 'Medium', scale: 1.1 },
+                          { label: 'Large', scale: 1.2 },
+                          { label: 'X-Large', scale: 1.35 },
+                        ].map((preset) => {
+                          const isSelected =
+                            Math.abs((profile.fontScale || 1.15) - preset.scale) < 0.04;
+                          return (
+                            <button
+                              key={preset.label}
+                              type="button"
+                              onClick={() =>
+                                setProfile({
+                                  ...profile,
+                                  fontScale: preset.scale,
+                                })
+                              }
+                              className={`py-1 px-1 rounded text-center text-[10px] font-medium border transition-all cursor-pointer ${
+                                isSelected
+                                  ? 'border-[#d4ff00] bg-[#d4ff00]/20 text-[#d4ff00] font-bold shadow-[0_0_8px_rgba(212,255,0,0.15)]'
+                                  : 'border-white/10 bg-white/5 text-white/60 hover:text-white hover:bg-white/10'
+                              }`}
+                            >
+                              {preset.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -1371,20 +1452,63 @@ export const GithubReadmeModal: React.FC<GithubReadmeModalProps> = ({
 
               {/* Right Column: Live Card Preview & Portrait Control */}
               <div className="lg:col-span-7 space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <span className="text-xs font-semibold text-white/70 uppercase tracking-wider flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-[#d4ff00]" />
                     <span>Card Live Preview</span>
                   </span>
 
-                  <button
-                    onClick={refreshPortrait}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 text-white/70 text-xs transition-colors cursor-pointer"
-                    title="Sync current 3D dither camera angle"
-                  >
-                    <RefreshCw className="w-3 h-3" />
-                    <span>Sync Angle</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {/* Quick Text Size Adjuster */}
+                    <div className="flex items-center gap-1 px-2 py-1 rounded bg-white/5 border border-white/10 text-white/70 text-xs">
+                      <Type className="w-3 h-3 text-[#d4ff00]" />
+                      <span className="text-[10px] text-white/50">Font:</span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setProfile((p) => ({
+                            ...p,
+                            fontScale: Math.max(
+                              0.85,
+                              parseFloat(((p.fontScale || 1.15) - 0.05).toFixed(2))
+                            ),
+                          }))
+                        }
+                        className="w-4 h-4 rounded flex items-center justify-center hover:bg-white/10 text-white/80 hover:text-white cursor-pointer font-bold text-xs"
+                        title="Decrease text size"
+                      >
+                        -
+                      </button>
+                      <span className="font-mono text-[#d4ff00] text-[11px] min-w-[32px] text-center font-bold">
+                        {((profile.fontScale || 1.15) * 100).toFixed(0)}%
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setProfile((p) => ({
+                            ...p,
+                            fontScale: Math.min(
+                              1.45,
+                              parseFloat(((p.fontScale || 1.15) + 0.05).toFixed(2))
+                            ),
+                          }))
+                        }
+                        className="w-4 h-4 rounded flex items-center justify-center hover:bg-white/10 text-white/80 hover:text-white cursor-pointer font-bold text-xs"
+                        title="Increase text size"
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={refreshPortrait}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 text-white/70 text-xs transition-colors cursor-pointer"
+                      title="Sync current 3D dither camera angle"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      <span>Sync Angle</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* THE CARD PREVIEW CONTAINER */}
@@ -1432,13 +1556,21 @@ export const GithubReadmeModal: React.FC<GithubReadmeModalProps> = ({
                           style={{ backgroundColor: profile.accentColor }}
                         />
                         <span
-                          className="text-[11px] font-bold tracking-wider font-mono"
-                          style={{ color: profile.accentColor }}
+                          className="font-bold tracking-wider font-mono"
+                          style={{
+                            fontSize: `${(0.75 * cardFontScale).toFixed(3)}rem`,
+                            color: profile.accentColor,
+                          }}
                         >
                           GITHUB DEVELOPER CARD
                         </span>
                       </div>
-                      <span className="text-[11px] text-white/50 font-mono">
+                      <span
+                        className="text-white/60 font-mono"
+                        style={{
+                          fontSize: `${(0.75 * cardFontScale).toFixed(3)}rem`,
+                        }}
+                      >
                         LOCATION: {profile.location.toUpperCase()}
                       </span>
                     </div>
@@ -1450,12 +1582,20 @@ export const GithubReadmeModal: React.FC<GithubReadmeModalProps> = ({
                       style={{ borderColor: `${profile.accentColor}33` }}
                     >
                       <span
-                        className="text-[10px] font-bold tracking-wider font-mono"
-                        style={{ color: profile.accentColor }}
+                        className="font-bold tracking-wider font-mono"
+                        style={{
+                          fontSize: `${(0.72 * cardFontScale).toFixed(3)}rem`,
+                          color: profile.accentColor,
+                        }}
                       >
                         GITHUB DEVELOPER CARD
                       </span>
-                      <span className="text-[10px] text-white/50 font-mono">
+                      <span
+                        className="text-white/60 font-mono"
+                        style={{
+                          fontSize: `${(0.72 * cardFontScale).toFixed(3)}rem`,
+                        }}
+                      >
                         LOCATION: {profile.location.toUpperCase()}
                       </span>
                     </div>
@@ -1511,10 +1651,10 @@ export const GithubReadmeModal: React.FC<GithubReadmeModalProps> = ({
 
                       {/* Extended Zoom Slider */}
                       <div className="w-full max-w-full mt-3 p-2 rounded-xl bg-black/60 border border-white/10 space-y-1.5 overflow-hidden box-border">
-                        <div className="flex items-center justify-between text-[10px] text-white/60">
+                        <div className="flex items-center justify-between text-xs text-white/60">
                           <span className="flex items-center gap-1 font-mono">
-                            <ZoomIn className="w-3 h-3 text-[#d4ff00]" />
-                            <span className="text-white/80">Zoom Scale</span>
+                            <ZoomIn className="w-3.5 h-3.5 text-[#d4ff00]" />
+                            <span className="text-white/80 font-medium">Zoom Scale</span>
                           </span>
                           <button
                             type="button"
@@ -1524,7 +1664,7 @@ export const GithubReadmeModal: React.FC<GithubReadmeModalProps> = ({
                                 imageZoom: 1.0,
                               }))
                             }
-                            className="font-mono text-[#d4ff00] hover:underline cursor-pointer text-[10px]"
+                            className="font-mono text-[#d4ff00] hover:underline cursor-pointer text-xs"
                             title="Reset to 1.0x"
                           >
                             {profile.imageZoom.toFixed(1)}x
@@ -1580,19 +1720,23 @@ export const GithubReadmeModal: React.FC<GithubReadmeModalProps> = ({
                     </div>
 
                     {/* RIGHT: Profile Identity & Details */}
-                    <div className="col-span-12 sm:col-span-8 flex flex-col justify-between space-y-3.5">
-                      <div className="space-y-3">
+                    <div className="col-span-12 sm:col-span-8 flex flex-col justify-between space-y-4">
+                      <div className="space-y-3.5">
                         {/* NAME */}
                         <div>
                           <span
-                            className="text-[10px] uppercase font-bold tracking-wider font-mono block mb-0.5"
-                            style={{ color: profile.accentColor }}
+                            className="uppercase font-bold tracking-wider font-mono block mb-2"
+                            style={{
+                              fontSize: `${(0.72 * cardFontScale).toFixed(3)}rem`,
+                              color: profile.accentColor,
+                            }}
                           >
                             NAME
                           </span>
                           <h1
-                            className="text-2xl md:text-3xl font-bold tracking-tight leading-tight"
+                            className="font-extrabold tracking-tight leading-tight"
                             style={{
+                              fontSize: `${(1.85 * cardFontScale).toFixed(3)}rem`,
                               fontFamily: activeHeadingFont.cssFamily,
                               color: profile.primaryTextColor,
                             }}
@@ -1602,16 +1746,20 @@ export const GithubReadmeModal: React.FC<GithubReadmeModalProps> = ({
                         </div>
 
                         {/* TITLE & LOCATION */}
-                        <div className="border-b border-white/10 pb-2.5">
+                        <div className="border-b border-white/10 pb-3">
                           <span
-                            className="text-[10px] uppercase font-bold tracking-wider font-mono block mb-0.5"
-                            style={{ color: profile.accentColor }}
+                            className="uppercase font-bold tracking-wider font-mono block mb-2"
+                            style={{
+                              fontSize: `${(0.72 * cardFontScale).toFixed(3)}rem`,
+                              color: profile.accentColor,
+                            }}
                           >
                             TITLE & LOCATION
                           </span>
                           <p
-                            className="text-sm font-semibold tracking-wide"
+                            className="font-semibold tracking-wide"
                             style={{
+                              fontSize: `${(0.95 * cardFontScale).toFixed(3)}rem`,
                               fontFamily: activeBodyFont.cssFamily,
                               color: profile.primaryTextColor,
                             }}
@@ -1623,14 +1771,18 @@ export const GithubReadmeModal: React.FC<GithubReadmeModalProps> = ({
                         {/* STATUS */}
                         <div>
                           <span
-                            className="text-[10px] uppercase font-bold tracking-wider font-mono block mb-0.5"
-                            style={{ color: profile.accentColor }}
+                            className="uppercase font-bold tracking-wider font-mono block mb-2"
+                            style={{
+                              fontSize: `${(0.72 * cardFontScale).toFixed(3)}rem`,
+                              color: profile.accentColor,
+                            }}
                           >
                             CURRENT STATUS
                           </span>
                           <p
-                            className="text-xs leading-relaxed"
+                            className="leading-relaxed"
                             style={{
+                              fontSize: `${(0.85 * cardFontScale).toFixed(3)}rem`,
                               fontFamily: activeBodyFont.cssFamily,
                               color: profile.primaryTextColor,
                             }}
@@ -1642,8 +1794,11 @@ export const GithubReadmeModal: React.FC<GithubReadmeModalProps> = ({
                         {/* SKILLS */}
                         <div>
                           <span
-                            className="text-[10px] uppercase font-bold tracking-wider font-mono block mb-1"
-                            style={{ color: profile.accentColor }}
+                            className="uppercase font-bold tracking-wider font-mono block mb-2"
+                            style={{
+                              fontSize: `${(0.72 * cardFontScale).toFixed(3)}rem`,
+                              color: profile.accentColor,
+                            }}
                           >
                             CORE SKILLS & TECHNOLOGIES
                           </span>
@@ -1651,8 +1806,10 @@ export const GithubReadmeModal: React.FC<GithubReadmeModalProps> = ({
                             {skillTags.map((skill, idx) => (
                               <span
                                 key={idx}
-                                className="px-2 py-0.5 rounded text-[11px] border"
+                                className="rounded border font-medium inline-block"
                                 style={{
+                                  fontSize: `${(0.75 * cardFontScale).toFixed(3)}rem`,
+                                  padding: `${Math.max(2, Math.round(3 * cardFontScale))}px ${Math.max(6, Math.round(9 * cardFontScale))}px`,
                                   fontFamily: activeBodyFont.cssFamily,
                                   backgroundColor: 'rgba(255, 255, 255, 0.05)',
                                   borderColor: `${profile.accentColor}40`,
@@ -1668,14 +1825,18 @@ export const GithubReadmeModal: React.FC<GithubReadmeModalProps> = ({
                         {/* FUN PART */}
                         <div>
                           <span
-                            className="text-[10px] uppercase font-bold tracking-wider font-mono block mb-0.5"
-                            style={{ color: profile.accentColor }}
+                            className="uppercase font-bold tracking-wider font-mono block mb-2"
+                            style={{
+                              fontSize: `${(0.72 * cardFontScale).toFixed(3)}rem`,
+                              color: profile.accentColor,
+                            }}
                           >
                             FUN PART
                           </span>
                           <p
-                            className="text-xs leading-relaxed opacity-95"
+                            className="leading-relaxed opacity-95"
                             style={{
+                              fontSize: `${(0.85 * cardFontScale).toFixed(3)}rem`,
                               fontFamily: activeBodyFont.cssFamily,
                               color: profile.primaryTextColor,
                             }}
