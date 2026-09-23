@@ -1,0 +1,6 @@
+{
+  "name": "GlyphDither 3D - Icon & ASCII Halftone Studio",
+  "description": "Real-time 3D icon dither and symbol halftone studio. Transform 3D sculptures, webcam feeds, and images into interactive kinetic glyph arrays with vector SVG and code export.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
