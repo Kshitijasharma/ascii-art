@@ -2,14 +2,30 @@
 
 @layer base {
   body {
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-family: Calibri, 'Gill Sans', 'Gill Sans MT', 'Trebuchet MS', -apple-system, BlinkMacSystemFont, sans-serif;
   }
-  .font-display {
-    font-family: 'Syne', sans-serif;
+  .font-calibri {
+    font-family: Calibri, 'Gill Sans', 'Gill Sans MT', 'Trebuchet MS', -apple-system, BlinkMacSystemFont, sans-serif;
   }
-  .font-mono {
-    font-family: 'JetBrains Mono', monospace;
+  .font-gochi {
+    font-family: 'Gochi Hand', cursive, sans-serif;
   }
+  .font-doodle {
+    font-family: 'Gochi Hand', cursive, sans-serif;
+  }
+  .font-hand {
+    font-family: 'Gochi Hand', 'Patrick Hand', cursive, sans-serif;
+  }
+  .font-pixel {
+    font-family: 'DotGothic16', monospace;
+  }
+}
+
+/* Lined notebook paper background */
+.lined-paper {
+  background-color: #ffffff;
+  background-image: linear-gradient(to right, rgba(99, 137, 186, 0.4) 1px, transparent 1px);
+  background-size: 32px 100%;
 }
 
 /* Custom scrollbars for clean studio panels */

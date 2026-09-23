@@ -1,5 +1,5 @@
 import React from 'react';
-import { Camera, Image as ImageIcon, Box, HelpCircle, Download, RotateCcw } from 'lucide-react';
+import { Camera, Image as ImageIcon, Box, HelpCircle, Download, RotateCcw, Github, Home } from 'lucide-react';
 import { InputSourceMode } from '../types';
 
 interface HeaderProps {
@@ -7,7 +7,9 @@ interface HeaderProps {
   onSelectSourceMode: (mode: InputSourceMode) => void;
   onOpenHowItWorks: () => void;
   onOpenExport: () => void;
+  onOpenGithubReadme: () => void;
   onResetView: () => void;
+  onGoHome: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -15,15 +17,31 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectSourceMode,
   onOpenHowItWorks,
   onOpenExport,
+  onOpenGithubReadme,
   onResetView,
+  onGoHome,
 }) => {
   return (
     <header className="h-14 px-4 md:px-6 border-b border-white/10 bg-black/90 backdrop-blur-md flex items-center justify-between shrink-0 z-30 select-none">
       {/* Zone 1: Single text element wordmark in display font */}
       <div className="flex items-center gap-3">
-        <span className="font-display text-lg md:text-xl font-bold tracking-tight text-white flex items-center gap-2">
+        <button
+          onClick={onGoHome}
+          className="flex items-center gap-2 p-1.5 -ml-1 rounded-lg hover:bg-white/10 text-white/70 hover:text-white transition-colors"
+          title="Back to Homepage"
+        >
+          <Home className="w-4 h-4 text-[#d4ff00]" />
+          <span className="text-xs font-semibold hidden sm:inline">Home</span>
+        </button>
+
+        <span className="text-white/20 hidden sm:inline">/</span>
+
+        <span
+          onClick={onGoHome}
+          className="font-display text-base md:text-lg font-bold tracking-tight text-white flex items-center gap-2 cursor-pointer hover:opacity-90"
+        >
           <span className="w-2.5 h-2.5 rounded-full bg-[#d4ff00] inline-block animate-pulse"></span>
-          GLYPH // DITHER 3D
+          asciireadme
         </span>
       </div>
 
@@ -87,6 +105,15 @@ export const Header: React.FC<HeaderProps> = ({
           <HelpCircle className="w-3.5 h-3.5 text-[#d4ff00]" />
           <span className="hidden md:inline">How It Works & Code</span>
           <span className="md:hidden">Guide</span>
+        </button>
+
+        <button
+          onClick={onOpenGithubReadme}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/10 rounded-md transition-colors border border-white/15 bg-white/[0.04]"
+          title="Build GitHub Profile README with Left Image & Right Bio"
+        >
+          <Github className="w-3.5 h-3.5 text-white" />
+          <span className="hidden sm:inline">GitHub README</span>
         </button>
 
         <button

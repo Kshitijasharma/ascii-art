@@ -19,6 +19,8 @@ import { GlyphViewport } from './components/GlyphViewport';
 import { ControlPanel } from './components/ControlPanel';
 import { HowItWorksModal } from './components/HowItWorksModal';
 import { ExportModal } from './components/ExportModal';
+import { GithubReadmeModal } from './components/GithubReadmeModal';
+import { LandingHome } from './components/LandingHome';
 
 const DEFAULT_SETTINGS: RenderSettings = {
   cellSize: 14,
@@ -41,6 +43,7 @@ const DEFAULT_SETTINGS: RenderSettings = {
 };
 
 export default function App() {
+  const [activeView, setActiveView] = useState<'home' | 'studio'>('home');
   const [sourceMode, setSourceMode] = useState<InputSourceMode>('3d-mesh');
   const [modelType, setModelType] = useState<MeshModelType>('classical-torso');
   const [customGeometry, setCustomGeometry] = useState<any>(null);
@@ -58,8 +61,22 @@ export default function App() {
   // Modals
   const [isHowItWorksOpen, setIsHowItWorksOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isGithubReadmeOpen, setIsGithubReadmeOpen] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  // Enter studio from homepage with targeted configuration
+  const handleEnterStudio = useCallback(
+    (mode: InputSourceMode = '3d-mesh', model?: MeshModelType) => {
+      setSourceMode(mode);
+      if (model) {
+        setModelType(model);
+        setCustomGeometry(null);
+      }
+      setActiveView('studio');
+    },
+    []
+  );
 
   // Find active glyph list
   const activeGlyphPreset =
@@ -100,55 +117,75 @@ export default function App() {
   }, []);
 
   return (
-    <div className="w-screen h-screen flex flex-col overflow-hidden bg-black text-white font-sans">
-      {/* Top Header */}
-      <Header
-        sourceMode={sourceMode}
-        onSelectSourceMode={setSourceMode}
-        onOpenHowItWorks={() => setIsHowItWorksOpen(true)}
-        onOpenExport={() => setIsExportOpen(true)}
-        onResetView={handleResetView}
-      />
+    <div
+      className={`w-screen h-screen flex flex-col overflow-hidden font-sans ${
+        activeView === 'home' ? 'bg-white text-gray-900' : 'bg-black text-white'
+      }`}
+    >
+      {/* View 1: Homepage Landing with Sections */}
+      {activeView === 'home' ? (
+        <div className="w-full h-full overflow-y-auto">
+          <LandingHome
+            onEnterStudio={handleEnterStudio}
+            onOpenGithubReadme={() => setIsGithubReadmeOpen(true)}
+            onOpenHowItWorks={() => setIsHowItWorksOpen(true)}
+          />
+        </div>
+      ) : (
+        /* View 2: Studio Interactive Mode */
+        <>
+          {/* Top Header */}
+          <Header
+            sourceMode={sourceMode}
+            onSelectSourceMode={setSourceMode}
+            onOpenHowItWorks={() => setIsHowItWorksOpen(true)}
+            onOpenExport={() => setIsExportOpen(true)}
+            onOpenGithubReadme={() => setIsGithubReadmeOpen(true)}
+            onResetView={handleResetView}
+            onGoHome={() => setActiveView('home')}
+          />
 
-      {/* Main Interactive Viewport */}
-      <main className="flex-1 relative w-full h-[calc(100vh-3.5rem)] overflow-hidden">
-        <GlyphViewport
-          sourceMode={sourceMode}
-          modelType={modelType}
-          customGeometry={customGeometry}
-          glyphs={activeGlyphPreset.glyphs}
-          settings={settings}
-          bgColor={customBgColor}
-          fgColor={customFgColor}
-          uploadedImageUrl={uploadedImageUrl}
-          onSetSourceImageData={setSourceImageData}
-          canvasRef={canvasRef}
-        />
+          {/* Main Interactive Viewport */}
+          <main className="flex-1 relative w-full h-[calc(100vh-3.5rem)] overflow-hidden">
+            <GlyphViewport
+              sourceMode={sourceMode}
+              modelType={modelType}
+              customGeometry={customGeometry}
+              glyphs={activeGlyphPreset.glyphs}
+              settings={settings}
+              bgColor={customBgColor}
+              fgColor={customFgColor}
+              uploadedImageUrl={uploadedImageUrl}
+              onSetSourceImageData={setSourceImageData}
+              canvasRef={canvasRef}
+            />
 
-        {/* Studio Controls Drawer/Sidebar */}
-        <ControlPanel
-          sourceMode={sourceMode}
-          modelType={modelType}
-          onSelectModel={(m) => {
-            setModelType(m);
-            setCustomGeometry(null);
-          }}
-          onUploadCustomModel={handleUploadCustomModel}
-          glyphPresetId={glyphPresetId}
-          onSelectGlyphPreset={setGlyphPresetId}
-          settings={settings}
-          onUpdateSettings={setSettings}
-          activeTheme={activeTheme}
-          onSelectTheme={setActiveTheme}
-          customBgColor={customBgColor}
-          customFgColor={customFgColor}
-          onChangeCustomColors={(bg, fg) => {
-            setCustomBgColor(bg);
-            setCustomFgColor(fg);
-          }}
-          onUploadImage={handleUploadImage}
-        />
-      </main>
+            {/* Studio Controls Drawer/Sidebar */}
+            <ControlPanel
+              sourceMode={sourceMode}
+              modelType={modelType}
+              onSelectModel={(m) => {
+                setModelType(m);
+                setCustomGeometry(null);
+              }}
+              onUploadCustomModel={handleUploadCustomModel}
+              glyphPresetId={glyphPresetId}
+              onSelectGlyphPreset={setGlyphPresetId}
+              settings={settings}
+              onUpdateSettings={setSettings}
+              activeTheme={activeTheme}
+              onSelectTheme={setActiveTheme}
+              customBgColor={customBgColor}
+              customFgColor={customFgColor}
+              onChangeCustomColors={(bg, fg) => {
+                setCustomBgColor(bg);
+                setCustomFgColor(fg);
+              }}
+              onUploadImage={handleUploadImage}
+            />
+          </main>
+        </>
+      )}
 
       {/* Educational Guide & Code Generator Modal */}
       <HowItWorksModal
@@ -160,6 +197,18 @@ export default function App() {
       <ExportModal
         isOpen={isExportOpen}
         onClose={() => setIsExportOpen(false)}
+        canvasRef={canvasRef}
+        sourceImageData={sourceImageData}
+        glyphs={activeGlyphPreset.glyphs}
+        settings={settings}
+        bgColor={customBgColor}
+        fgColor={customFgColor}
+      />
+
+      {/* GitHub README Builder Modal */}
+      <GithubReadmeModal
+        isOpen={isGithubReadmeOpen}
+        onClose={() => setIsGithubReadmeOpen(false)}
         canvasRef={canvasRef}
         sourceImageData={sourceImageData}
         glyphs={activeGlyphPreset.glyphs}
